@@ -11,10 +11,15 @@ const Admin = require('./models/Admin');
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 4000;
+
 const BITBUCKET_API_URL = 'https://api.bitbucket.org/2.0';
 
-app.use(cors());
+app.use(cors({
+  origin: '*', // Allow all origins (Change this to your frontend URL for security)
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type'],
+}));
+
 app.use(express.json());
 app.use(morgan('dev'));
 
