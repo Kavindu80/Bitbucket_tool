@@ -37,7 +37,7 @@ const Contributions = () => {
     setError(null);
     try {
       const response = await fetch(
-        `http://localhost:4000/api/commits?workspace=${workspace}&repoSlug=${repoSlug}`,
+        `https://bitbucket-tool.vercel.app/api/commits?workspace=${workspace}&repoSlug=${repoSlug}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('bitbucketToken')}`,

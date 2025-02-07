@@ -24,7 +24,7 @@ const StudentSignup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:4000/api/students/signup', {
+      const response = await fetch('https://bitbucket-tool.vercel.app/api/students/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

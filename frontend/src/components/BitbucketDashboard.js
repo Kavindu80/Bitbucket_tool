@@ -41,7 +41,7 @@ const BitbucketDashboard = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:4000/api/projects?workspace=${workspace}`,
+        `https://bitbucket-tool.vercel.app/api/projects?workspace=${workspace}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -76,7 +76,7 @@ const BitbucketDashboard = () => {
 
       try {
         const response = await fetch(
-          `http://localhost:4000/api/commits?workspace=${workspace}&repoSlug=${repoSlug}`,
+          `https://bitbucket-tool.vercel.app/api/commits?workspace=${workspace}&repoSlug=${repoSlug}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }

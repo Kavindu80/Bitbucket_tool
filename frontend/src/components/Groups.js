@@ -28,7 +28,7 @@ const Groups = () => {
 
   const fetchGroups = async () => {
     try {
-      const response = await fetch('http://localhost:4000/api/admin/groups');
+      const response = await fetch('https://bitbucket-tool.vercel.app/api/admin/groups');
       if (!response.ok) throw new Error('Failed to fetch groups');
       const data = await response.json();
       setGroups(data);
@@ -41,7 +41,7 @@ const Groups = () => {
 
   const fetchProjects = async (groupNumber, workspaceName, token) => {
     try {
-      const response = await fetch(`http://localhost:4000/api/admin/workspace-projects/${workspaceName}`);
+      const response = await fetch(`https://bitbucket-tool.vercel.app/api/admin/workspace-projects/${workspaceName}`);
       if (!response.ok) throw new Error('Failed to fetch projects');
       const data = await response.json();
       setProjects((prev) => ({ ...prev, [groupNumber]: data }));
@@ -54,7 +54,7 @@ const Groups = () => {
 
   const fetchLastCommits = async (workspaceName, repoSlug) => {
     try {
-      const response = await fetch(`http://localhost:4000/api/admin/commits/${workspaceName}/${repoSlug}`);
+      const response = await fetch(`https://bitbucket-tool.vercel.app/api/admin/commits/${workspaceName}/${repoSlug}`);
       if (!response.ok) throw new Error('Failed to fetch commits');
       const data = await response.json();
       setCommits((prev) => ({ ...prev, [`${workspaceName}/${repoSlug}`]: data }));
@@ -66,7 +66,7 @@ const Groups = () => {
   // New function to fetch all commits
   const fetchAllCommits = async (workspaceName, repoSlug) => {
     try {
-      const response = await fetch(`http://localhost:4000/api/admin/all-commits/${workspaceName}/${repoSlug}`);
+      const response = await fetch(`https://bitbucket-tool.vercel.app/api/admin/all-commits/${workspaceName}/${repoSlug}`);
       if (!response.ok) throw new Error('Failed to fetch all commits');
       const data = await response.json();
       setAllCommits((prev) => ({ ...prev, [`${workspaceName}/${repoSlug}`]: data }));
@@ -77,7 +77,7 @@ const Groups = () => {
 
   const fetchContributions = async (workspaceName, repoSlug) => {
     try {
-      const response = await fetch(`http://localhost:4000/api/admin/contributions/${workspaceName}/${repoSlug}`);
+      const response = await fetch(`https://bitbucket-tool.vercel.app/api/admin/contributions/${workspaceName}/${repoSlug}`);
       if (!response.ok) throw new Error('Failed to fetch contributions');
       const data = await response.json();
       setContributions((prev) => ({ ...prev, [`${workspaceName}/${repoSlug}`]: data }));

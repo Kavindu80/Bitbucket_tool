@@ -29,7 +29,7 @@ const AdminDashboard = () => {
 
   const fetchGroups = async () => {
     try {
-      const response = await fetch('http://localhost:4000/api/admin/groups');
+      const response = await fetch('https://bitbucket-tool.vercel.app/api/admin/groups');
       if (!response.ok) throw new Error('Failed to fetch groups');
       const data = await response.json();
       setGroups(data);

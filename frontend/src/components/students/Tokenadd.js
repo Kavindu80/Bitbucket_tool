@@ -11,7 +11,7 @@ const TokenAdd = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:4000/api/tokens', {
+      const response = await fetch('https://bitbucket-tool.vercel.app/api/tokens', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
