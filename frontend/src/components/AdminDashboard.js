@@ -56,7 +56,7 @@ const AdminDashboard = () => {
 
   const fetchLastCommits = async (workspaceName, repoSlug) => {
     try {
-      const response = await fetch(`http://localhost:4000/api/admin/commits/${workspaceName}/${repoSlug}`);
+      const response = await fetch(`https://bitbucket-tool.vercel.app/admin/commits/${workspaceName}/${repoSlug}`);
       if (!response.ok) throw new Error('Failed to fetch commits');
       const data = await response.json();
       setCommits((prev) => ({ ...prev, [`${workspaceName}/${repoSlug}`]: data }));
@@ -67,7 +67,7 @@ const AdminDashboard = () => {
 
   const fetchAllCommits = async (workspaceName, repoSlug) => {
     try {
-      const response = await fetch(`http://localhost:4000/api/admin/all-commits/${workspaceName}/${repoSlug}`);
+      const response = await fetch(`https://bitbucket-tool.vercel.app/api/admin/all-commits/${workspaceName}/${repoSlug}`);
       if (!response.ok) throw new Error('Failed to fetch all commits');
       const data = await response.json();
       setAllCommits((prev) => ({ ...prev, [`${workspaceName}/${repoSlug}`]: data }));
@@ -78,7 +78,7 @@ const AdminDashboard = () => {
 
   const fetchContributions = async (workspaceName, repoSlug) => {
     try {
-      const response = await fetch(`http://localhost:4000/api/admin/contributions/${workspaceName}/${repoSlug}`);
+      const response = await fetch(`https://bitbucket-tool.vercel.app/api/admin/contributions/${workspaceName}/${repoSlug}`);
       if (!response.ok) throw new Error('Failed to fetch contributions');
       const data = await response.json();
       setContributions((prev) => ({ ...prev, [`${workspaceName}/${repoSlug}`]: data }));
