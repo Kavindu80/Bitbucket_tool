@@ -28,7 +28,7 @@ const AdminSignup = () => {
     }
 
     try {
-      const response = await fetch('https://bitbucket-tool.vercel.app/api/admin/signup', {
+      const response = await fetch('bitbucketdashboard.vercel.app/api/admin/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
