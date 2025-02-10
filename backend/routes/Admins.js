@@ -216,7 +216,7 @@ router.get(
 
 // Fetch All Commits (New Endpoint)
 router.get(
-    '/all-commits/:workspaceName/:repoSlug',
+    '/commits/:workspaceName/:repoSlug',
     asyncHandler(async (req, res) => {
         const { workspaceName, repoSlug } = req.params;
         const student = await Student.findOne({ workspaceName });
@@ -234,7 +234,7 @@ router.get(
                         'Accept': 'application/json'
                     },
                     params: { 
-                        pagelen: 100,  // Get more commits
+                        pagelen: 2,
                         sort: '-date'
                     }
                 }
@@ -250,14 +250,15 @@ router.get(
 
             res.status(200).json(commits);
         } catch (error) {
-            console.error(`Error fetching all commits for ${workspaceName}/${repoSlug}:`, error.message);
+            console.error(`Error fetching commits for ${workspaceName}/${repoSlug}:`, error.message);
             res.status(500).json({ 
-                message: 'Error fetching all commits',
+                message: 'Error fetching commits',
                 error: error.response?.data?.error?.message || error.message
             });
         }
     })
 );
+
 
 // Fetch Project Contributions
 router.get(
