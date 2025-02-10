@@ -11,15 +11,16 @@ const Admin = require('./models/Admin');
 dotenv.config();
 
 const app = express();
-
 const BITBUCKET_API_URL = 'https://api.bitbucket.org/2.0';
 
-const cors = require('cors');
+// Proper CORS configuration
 app.use(cors({
-  origin: 'https://bitbucket-tool-janakage.vercel.app',  // Allow only this frontend
-  methods: 'GET,POST,PUT,DELETE,OPTIONS',
-  allowedHeaders: 'Authorization, Content-Type' // Allow Authorization header
+  origin: 'https://bitbucket-tool-janakage.vercel.app', // Change this to your frontend URL if needed
+  methods: 'GET, POST, PUT, DELETE, OPTIONS',
+  allowedHeaders: 'Authorization, Content-Type',
+  credentials: true,
 }));
+
 app.use(express.json());
 app.use(morgan('dev'));
 
@@ -27,7 +28,6 @@ class AppError extends Error {
   constructor(message, statusCode) {
     super(message);
     this.statusCode = statusCode;
-    // this.isOperational = true
     Error.captureStackTrace(this, this.constructor);
   }
 }
@@ -43,16 +43,13 @@ app.use((err, req, res, next) => {
     status: err.statusCode || 500,
   });
 
-  const status = err.statusCode || 500;
-  const response = {
+  res.status(err.statusCode || 500).json({
     success: false,
     error: {
       message: err.message || 'Internal Server Error',
       ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
     },
-  };
-
-  res.status(status).json(response);
+  });
 });
 
 const validateCredentials = async (workspace, accessToken) => {
@@ -63,46 +60,33 @@ const validateCredentials = async (workspace, accessToken) => {
     });
     return response.status === 200;
   } catch (error) {
-    const status = error.response?.status || 500;
-    const message = error.response?.data?.error?.message || error.message;
-    throw new AppError(`Validation failed: ${message}`, status);
+    throw new AppError(`Validation failed: ${error.message}`, error.response?.status || 500);
   }
 };
-// Login route to validate username and password and fetch workspace and token
+
+// Login route
 app.post(
   '/api/login',
   asyncHandler(async (req, res, next) => {
     const { username, password } = req.body;
-
     if (!username || !password) {
       return next(new AppError('Username and password are required.', 400));
     }
 
     const student = await Student.findOne({ username });
-    if (!student) {
+    if (!student || !(await bcrypt.compare(password, student.password))) {
       return next(new AppError('Invalid username or password.', 401));
     }
 
-    const isPasswordValid = await bcrypt.compare(password, student.password);
-    if (!isPasswordValid) {
-      return next(new AppError('Invalid username or password.', 401));
-    }
-
-    // Validate workspace and token
-    const isValid = await validateCredentials(student.workspaceName, student.token);
-    if (!isValid) {
+    if (!(await validateCredentials(student.workspaceName, student.token))) {
       return next(new AppError('Workspace or token validation failed.', 401));
     }
 
-    res.json({
-      success: true,
-      message: 'Login successful',
-      workspace: student.workspaceName,
-      token: student.token,
-    });
+    res.json({ success: true, message: 'Login successful', workspace: student.workspaceName, token: student.token });
   })
 );
 
+// Fetch projects
 app.get(
   '/api/projects',
   asyncHandler(async (req, res, next) => {
@@ -118,20 +102,14 @@ app.get(
         headers: { Authorization: `Bearer ${accessToken}` },
       });
 
-      const repositories = response.data.values.map((repo) => ({
-        name: repo.name,
-        slug: repo.slug,
-        description: repo.description,
-        updated_on: repo.updated_on,
-      }));
-
-      res.json({ success: true, repositories });
+      res.json({ success: true, repositories: response.data.values });
     } catch (error) {
-      next(new AppError('Failed to fetch repositories. Check your workspace or token.', 500));
+      next(new AppError('Failed to fetch repositories.', 500));
     }
   })
 );
 
+// Fetch commits
 app.get(
   '/api/commits',
   asyncHandler(async (req, res, next) => {
@@ -147,16 +125,9 @@ app.get(
         headers: { Authorization: `Bearer ${accessToken}` },
       });
 
-      const commits = response.data.values.map((commit) => ({
-        hash: commit.hash,
-        message: commit.message,
-        author: commit.author.raw,
-        date: commit.date,
-      }));
-
-      res.json({ success: true, commits });
+      res.json({ success: true, commits: response.data.values });
     } catch (error) {
-      next(new AppError('Failed to fetch commits. Check your workspace, repoSlug, or token.', 500));
+      next(new AppError('Failed to fetch commits.', 500));
     }
   })
 );
