@@ -11,10 +11,13 @@ const Admin = require('./models/Admin');
 dotenv.config();
 
 const app = express();
+const PORT = process.env.PORT || 4000;
 const BITBUCKET_API_URL = 'https://api.bitbucket.org/2.0';
 
-// Proper CORS configuration
-const allowedOrigins = ['https://bitbucket-tool-janakage.vercel.app', 'http://localhost:3000']; // Add more if needed
+app.use(express.json());
+app.use(morgan('dev'));
+
+const allowedOrigins = ['https://bitbucket-tool-janakage.vercel.app', 'http://localhost:3000']; 
 
 app.use(cors({
   origin: function (origin, callback) {
@@ -29,13 +32,11 @@ app.use(cors({
   credentials: true
 }));
 
-app.use(express.json());
-app.use(morgan('dev'));
-
 class AppError extends Error {
   constructor(message, statusCode) {
     super(message);
     this.statusCode = statusCode;
+    // this.isOperational = true
     Error.captureStackTrace(this, this.constructor);
   }
 }
@@ -43,12 +44,6 @@ class AppError extends Error {
 const asyncHandler = (fn) => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
 };
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "https://bitbucket-tool-janakage.vercel.app/"); // Allow all or specify frontend URL
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Authorization, Content-Type");
-  next();
-});
 
 app.use((err, req, res, next) => {
   console.error('Error:', {
@@ -57,13 +52,16 @@ app.use((err, req, res, next) => {
     status: err.statusCode || 500,
   });
 
-  res.status(err.statusCode || 500).json({
+  const status = err.statusCode || 500;
+  const response = {
     success: false,
     error: {
       message: err.message || 'Internal Server Error',
       ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
     },
-  });
+  };
+
+  res.status(status).json(response);
 });
 
 const validateCredentials = async (workspace, accessToken) => {
@@ -74,33 +72,46 @@ const validateCredentials = async (workspace, accessToken) => {
     });
     return response.status === 200;
   } catch (error) {
-    throw new AppError(`Validation failed: ${error.message}`, error.response?.status || 500);
+    const status = error.response?.status || 500;
+    const message = error.response?.data?.error?.message || error.message;
+    throw new AppError(`Validation failed: ${message}`, status);
   }
 };
-
-// Login route
+// Login route to validate username and password and fetch workspace and token
 app.post(
   '/api/login',
   asyncHandler(async (req, res, next) => {
     const { username, password } = req.body;
+
     if (!username || !password) {
       return next(new AppError('Username and password are required.', 400));
     }
 
     const student = await Student.findOne({ username });
-    if (!student || !(await bcrypt.compare(password, student.password))) {
+    if (!student) {
       return next(new AppError('Invalid username or password.', 401));
     }
 
-    if (!(await validateCredentials(student.workspaceName, student.token))) {
+    const isPasswordValid = await bcrypt.compare(password, student.password);
+    if (!isPasswordValid) {
+      return next(new AppError('Invalid username or password.', 401));
+    }
+
+    // Validate workspace and token
+    const isValid = await validateCredentials(student.workspaceName, student.token);
+    if (!isValid) {
       return next(new AppError('Workspace or token validation failed.', 401));
     }
 
-    res.json({ success: true, message: 'Login successful', workspace: student.workspaceName, token: student.token });
+    res.json({
+      success: true,
+      message: 'Login successful',
+      workspace: student.workspaceName,
+      token: student.token,
+    });
   })
 );
 
-// Fetch projects
 app.get(
   '/api/projects',
   asyncHandler(async (req, res, next) => {
@@ -116,14 +127,20 @@ app.get(
         headers: { Authorization: `Bearer ${accessToken}` },
       });
 
-      res.json({ success: true, repositories: response.data.values });
+      const repositories = response.data.values.map((repo) => ({
+        name: repo.name,
+        slug: repo.slug,
+        description: repo.description,
+        updated_on: repo.updated_on,
+      }));
+
+      res.json({ success: true, repositories });
     } catch (error) {
-      next(new AppError('Failed to fetch repositories.', 500));
+      next(new AppError('Failed to fetch repositories. Check your workspace or token.', 500));
     }
   })
 );
 
-// Fetch commits
 app.get(
   '/api/commits',
   asyncHandler(async (req, res, next) => {
@@ -139,9 +156,16 @@ app.get(
         headers: { Authorization: `Bearer ${accessToken}` },
       });
 
-      res.json({ success: true, commits: response.data.values });
+      const commits = response.data.values.map((commit) => ({
+        hash: commit.hash,
+        message: commit.message,
+        author: commit.author.raw,
+        date: commit.date,
+      }));
+
+      res.json({ success: true, commits });
     } catch (error) {
-      next(new AppError('Failed to fetch commits.', 500));
+      next(new AppError('Failed to fetch commits. Check your workspace, repoSlug, or token.', 500));
     }
   })
 );
@@ -151,7 +175,6 @@ mongoose.connect('mongodb+srv://kavindu:xppFRIgfwykHia2E@cluster0.iofqwq5.mongod
   .then(() => console.log('MongoDB connected successfully'))
   .catch(err => console.error('MongoDB connection error:', err));
 
-// Routes
 const adminRoutes = require('./routes/Admins');
 app.use('/api/admin', adminRoutes);
 
