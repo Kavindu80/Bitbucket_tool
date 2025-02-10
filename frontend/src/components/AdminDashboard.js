@@ -48,7 +48,7 @@ const AdminDashboard = () => {
   // Keep all your existing functions
   const fetchProjects = async (groupNumber, workspaceName, token) => {
     try {
-      const response = await fetch(`https://bitbucket-tool.vercel.app/admin/workspace-projects/${workspaceName}`);
+      const response = await fetch(`https://bitbucket-tool.vercel.app/api/admin/workspace-projects/${workspaceName}`);
       if (!response.ok) throw new Error('Failed to fetch projects');
       const data = await response.json();
       setProjects((prev) => ({ ...prev, [groupNumber]: data }));
@@ -72,7 +72,7 @@ const AdminDashboard = () => {
 
   const fetchAllCommits = async (workspaceName, repoSlug) => {
     try {
-      const response = await fetch(`https://bitbucket-tool.vercel.app/admin/all-commits/${workspaceName}/${repoSlug}`);
+      const response = await fetch(`https://bitbucket-tool.vercel.app/api/admin/all-commits/${workspaceName}/${repoSlug}`);
       if (!response.ok) throw new Error('Failed to fetch all commits');
       const data = await response.json();
       setAllCommits((prev) => ({ ...prev, [`${workspaceName}/${repoSlug}`]: data }));
