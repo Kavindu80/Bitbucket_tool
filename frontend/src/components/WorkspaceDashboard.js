@@ -13,7 +13,7 @@ const WorkspaceDashboard = () => {
 
   const fetchContributors = async () => {
     try {
-      const response = await fetch('https://bitbucket-tool.vercel.app/api/admin/all-contributors');
+      const response = await fetch('bitbucketdashboard.vercel.app/api/admin/all-contributors');
       if (!response.ok) throw new Error('Failed to fetch contributors');
       const data = await response.json();
       setContributors(data);
