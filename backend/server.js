@@ -14,12 +14,12 @@ const app = express();
 
 const BITBUCKET_API_URL = 'https://api.bitbucket.org/2.0';
 
+const cors = require('cors');
 app.use(cors({
-  origin: '*', // Allow all origins (Change this to your frontend URL for security)
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type'],
+  origin: 'https://bitbucket-tool-janakage.vercel.app',  // Allow only this frontend
+  methods: 'GET,POST,PUT,DELETE,OPTIONS',
+  allowedHeaders: 'Authorization, Content-Type' // Allow Authorization header
 }));
-
 app.use(express.json());
 app.use(morgan('dev'));
 
