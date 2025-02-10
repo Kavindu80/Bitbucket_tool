@@ -28,7 +28,7 @@ const Contributors = () => {
   const fetchContributors = async () => {
     setLoading(true);
     try {
-      const response = await fetch('https://bitbucket-tool.vercel.app/api/contributors');
+      const response = await fetch('bitbucketdashboard.vercel.app/api/contributors');
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
