@@ -17,7 +17,7 @@ const BITBUCKET_API_URL = 'https://api.bitbucket.org/2.0';
 app.use(express.json());
 app.use(morgan('dev'));
 
-const allowedOrigins = ['https://bitbucket-tool-janakage.vercel.app', 'http://localhost:3000']; 
+const allowedOrigins = ['Bitbucketdashboard.vercel.app', 'http://localhost:3000']; 
 
 app.use(cors({
   origin: function (origin, callback) {
