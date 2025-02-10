@@ -14,11 +14,19 @@ const app = express();
 const BITBUCKET_API_URL = 'https://api.bitbucket.org/2.0';
 
 // Proper CORS configuration
+const allowedOrigins = ['https://bitbucket-tool-janakage.vercel.app', 'http://localhost:3000']; // Add more if needed
+
 app.use(cors({
-  origin: 'https://bitbucket-tool-janakage.vercel.app', // Change this to your frontend URL if needed
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: 'GET, POST, PUT, DELETE, OPTIONS',
   allowedHeaders: 'Authorization, Content-Type',
-  credentials: true,
+  credentials: true
 }));
 
 app.use(express.json());
@@ -35,6 +43,12 @@ class AppError extends Error {
 const asyncHandler = (fn) => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
 };
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "https://bitbucket-tool-janakage.vercel.app/"); // Allow all or specify frontend URL
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Authorization, Content-Type");
+  next();
+});
 
 app.use((err, req, res, next) => {
   console.error('Error:', {
