@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LineChart, Line } from 'recharts';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import ContributorsDashboard from './ContributorsDashboard';
@@ -16,7 +17,11 @@ const AdminDashboard = () => {
   const [error, setError] = useState(null);
   const [selectedProject, setSelectedProject] = useState(null);
   const [activeView, setActiveView] = useState(null);
-  const [dashboardView, setDashboardView] = useState('groups');  
+  const [dashboardView, setDashboardView] = useState('groups');
+  const [projectView, setprojectView] = useState('projects');
+   // New state for switching between views
+  const navigate = useNavigate();
+  
 
   useEffect(() => {
     fetchGroups();
@@ -43,7 +48,7 @@ const AdminDashboard = () => {
   // Keep all your existing functions
   const fetchProjects = async (groupNumber, workspaceName, token) => {
     try {
-      const response = await fetch(`https://bitbucket-tool.vercel.app/api/admin/workspace-projects/${workspaceName}`);
+      const response = await fetch(`https://bitbucket-tool.vercel.app/admin/workspace-projects/${workspaceName}`);
       if (!response.ok) throw new Error('Failed to fetch projects');
       const data = await response.json();
       setProjects((prev) => ({ ...prev, [groupNumber]: data }));
@@ -56,7 +61,7 @@ const AdminDashboard = () => {
 
   const fetchLastCommits = async (workspaceName, repoSlug) => {
     try {
-      const response = await fetch(`https://bitbucket-tool.vercel.app/admin/commits/${workspaceName}/${repoSlug}`);
+      const response = await fetch(`https://bitbucket-tool.vercel.app/api/admin/commits/${workspaceName}/${repoSlug}`);
       if (!response.ok) throw new Error('Failed to fetch commits');
       const data = await response.json();
       setCommits((prev) => ({ ...prev, [`${workspaceName}/${repoSlug}`]: data }));
@@ -67,7 +72,7 @@ const AdminDashboard = () => {
 
   const fetchAllCommits = async (workspaceName, repoSlug) => {
     try {
-      const response = await fetch(`https://bitbucket-tool.vercel.app/api/admin/all-commits/${workspaceName}/${repoSlug}`);
+      const response = await fetch(`https://bitbucket-tool.vercel.app/admin/all-commits/${workspaceName}/${repoSlug}`);
       if (!response.ok) throw new Error('Failed to fetch all commits');
       const data = await response.json();
       setAllCommits((prev) => ({ ...prev, [`${workspaceName}/${repoSlug}`]: data }));
