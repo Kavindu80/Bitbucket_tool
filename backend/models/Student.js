@@ -8,6 +8,7 @@ const studentSchema = new mongoose.Schema({
   password: { type: String, required: true },
   token: { type: String, required: true },
   workspaceName: { type: String, required: true, unique: true },
+  role: { type: String, required: true },
 });
 
-module.exports = mongoose.model('Student', studentSchema);
+module.exports = mongoose.model('User', studentSchema);
