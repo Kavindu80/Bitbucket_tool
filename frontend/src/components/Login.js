@@ -1,24 +1,23 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
+    setIsLoading(true);
 
     if (!username || !password) {
       setError('Please enter both username and password');
+      setIsLoading(false);
       return;
     }
 
     try {
-      console.log('Logging in with:', { username, password });
-
       const response = await fetch('https://bitbucket-backend.vercel.app/api/login', {
         method: 'POST',
         headers: {
@@ -28,21 +27,30 @@ const Login = () => {
       });
 
       const data = await response.json();
-      console.log('Backend response:', data);
 
       if (response.ok) {
+        // Store user data
         localStorage.setItem('bitbucketWorkspace', data.workspace);
         localStorage.setItem('bitbucketToken', data.token);
+        localStorage.setItem('userRole', data.role);
+        localStorage.setItem('userName', data.name);
 
-        console.log('Login successful, navigating to dashboard...');
-        navigate('/dashboard');
+        console.log(data.role);
+
+        // Navigate based on role
+        if (data.role === 'admin') {
+          window.location.href = '/admin/dashboard';
+        } else {
+          window.location.href = '/dashboard';
+        }
       } else {
-        console.error('Error from backend:', data.error);
         setError(data.error || 'Authentication failed');
       }
     } catch (err) {
       console.error('Network error:', err);
       setError('Network error. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -51,7 +59,7 @@ const Login = () => {
       <div className="w-full max-w-md bg-white shadow-2xl rounded-2xl overflow-hidden">
         <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6">
           <h2 className="text-3xl font-bold text-white text-center">
-            Bitbucket Dashboard
+            Bitbucket Dashboard Login
           </h2>
         </div>
 
@@ -68,6 +76,7 @@ const Login = () => {
               placeholder="Enter your username"
               className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300"
               required
+              disabled={isLoading}
             />
           </div>
 
@@ -83,6 +92,7 @@ const Login = () => {
               placeholder="Enter your password"
               className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300"
               required
+              disabled={isLoading}
             />
           </div>
 
@@ -95,29 +105,19 @@ const Login = () => {
           <button
             type="submit"
             className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition duration-300 flex items-center justify-center space-x-2"
+            disabled={isLoading}
           >
-            <span>Login</span>
+            <span>{isLoading ? 'Logging in...' : 'Login'}</span>
           </button>
 
           <div className="text-center text-sm text-gray-600 mt-4">
             <p>Don't have an account?</p>
             <button
               type="button"
-              onClick={() => navigate('/studentsignup')}
               className="text-blue-600 hover:underline"
+              onClick={() => window.location.href = '/studentsignup'}
             >
               Sign up as Student
-            </button>
-          </div>
-
-          <div className="text-center text-sm text-gray-600 mt-4">
-            <p>Are you an Admin?</p>
-            <button
-              type="button"
-              onClick={() => navigate('/adminlogin')}
-              className="text-indigo-600 hover:underline font-semibold"
-            >
-              Login as Admin
             </button>
           </div>
         </form>
