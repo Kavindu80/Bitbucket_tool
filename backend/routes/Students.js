@@ -14,6 +14,7 @@ router.post('/signup', async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    const role = 'user'
 
     const student = new Student({
       serviceId,
@@ -23,6 +24,7 @@ router.post('/signup', async (req, res) => {
       password: hashedPassword,
       token,
       workspaceName,
+      role
     });
 
     await student.save();
