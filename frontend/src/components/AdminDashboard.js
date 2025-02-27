@@ -34,7 +34,7 @@ const AdminDashboard = () => {
 
   const fetchGroups = async () => {
     try {
-      const response = await fetch('https://cors-anywhere.herokuapp.com/https://bitbucket-backend.vercel.app/api/admin/groups');
+      const response = await fetch('https://bitbucket-backend.vercel.app/api/admin/groups');
       if (!response.ok) throw new Error('Failed to fetch groups');
       const data = await response.json();
       setGroups(data);
